@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+    node:
+        container_name: node
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile.dev
+        env_file: .env.local
+        environment:
+            - PORT=${PORT}
+            - MONGO_URL=${MONGO_URL}
+        ports:
+            - '3000:3000'
+        networks:
+            - streaming_api
+        volumes:
+            - .:/app
+        external_links:
+            - mongo
+        depends_on:
+            - mongo
+    mongo:
+        container_name: mongo
+        image: mongo:latest
+        ports:
+            - '27017:27017'
+        networks:
+            - streaming_api
+        volumes:
+            - ./data:/data/db
+
+networks:
+    streaming_api:
