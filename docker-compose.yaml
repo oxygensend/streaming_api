@@ -22,7 +22,7 @@ services:
             - mongo
     mongo:
         container_name: mongo
-        image: mongo:latest
+        image: mongo:4.4.6
         ports:
             - '27017:27017'
         networks:
