@@ -1,17 +1,22 @@
-import express, {Application} from "express";
-import {logger} from "../logger/logger";
+import express, {Application, Request, Response} from "express";
 import {Database} from "./database";
-import {Router} from "./router";
+import {Routes} from "./routes";
+import {Logger} from "./logger";
+import winston from "winston";
 
 export class Server {
 
-    private static app: Application;
-    private static port: string | number;
+    private app: Application;
+    private readonly port: string | number;
     private static instance: Server;
+    private routes: Routes;
+    private logger: winston.Logger;
 
     private constructor() {
-        Server.app = express();
-        Server.port = <string>process.env["PORT"] || 3000;
+        this.app = express();
+        this.port = <string>process.env["PORT"] || 3000;
+        this.routes = Routes.getInstance();
+        this.logger = Logger.getLogger();
     }
 
     public static getInstance(): Server {
@@ -24,18 +29,15 @@ export class Server {
     public run(): void {
 
         this.config();
-
-        Server.app.listen(Server.port, () => {
-            logger.info(`App is listening on port ${Server.port} !`)
+        this.app.listen(this.port, () => {
+            this.logger.info(`App is listening on port ${this.port} !`)
         })
     }
 
     private config(): void {
-
         this.databaseSetUp();
-        this.routerSetUp();
-        Server.app.use(express.json());
-
+        this.routesSetUp();
+        this.app.use(express.json());
     }
 
     private databaseSetUp(): void {
@@ -43,11 +45,8 @@ export class Server {
         database.connect().then(data => console.log(data));
     }
 
-    private routerSetUp(): void {
-        Router.getInstance();
-        Router.setApplication(Server.app);
-        Router.setRoute('/', (req, res) => {
-            res.send('WELCOME');
-        });
+    private routesSetUp(): void {
+        this.app.use(this.routes.getRouter());
+        this.routes.registerRoutes();
     }
 }
