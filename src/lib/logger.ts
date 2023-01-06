@@ -14,7 +14,8 @@ export class Logger {
                     new transports.File({filename: 'var/dev.log'})
                 ],
                 exceptionHandlers: [
-                    new transports.File({filename: 'exceptions.log'})
+                    new transports.File({filename: 'var/exceptions.log'}),
+                    new transports.Console()
                 ],
                 format: winston.format.combine(
                     winston.format.json(),

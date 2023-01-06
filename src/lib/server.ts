@@ -36,8 +36,8 @@ export class Server {
 
     private config(): void {
         this.databaseSetUp();
-        this.routesSetUp();
         this.app.use(express.json());
+        this.routesSetUp();
     }
 
     private databaseSetUp(): void {

@@ -20,8 +20,9 @@ export class Routes {
         return Routes.instance;
     }
 
-    public setRoute(method: Method, path: string, binding: any) {
-        this.router[method](path, binding);
+    public setRoute(method: Method, path: string, middlewares: any[], binding: any) {
+        console.log(...middlewares);
+        this.router[method](path, ...middlewares, binding);
     }
 
     public getRouter(): Router {
@@ -34,9 +35,11 @@ export class Routes {
             const routes: IRoute[] = Reflect.getMetadata('routes', controllerClass);
             const prefix: string = Reflect.getMetadata('prefix', controllerClass);
             routes.forEach((route: IRoute) => {
+                console.log(...route.middlewares);
                 this.setRoute(
                     route.method,
                     `${prefix}${route.path}`,
+                    route.middlewares,
                     instance[route.methodName].bind(instance)
                 );
             });
