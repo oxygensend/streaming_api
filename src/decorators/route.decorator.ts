@@ -2,7 +2,7 @@ import {Method, IRoute} from "./route.types";
 import 'reflect-metadata';
 
 /**
- *  Method decorator factory responsible for routing in application
+ *  Method decorators factory responsible for routing in application
  */
 const methodRouteDecoratorFactory = (method: Method) => {
     return (path: string, middlewares: any[] = []): MethodDecorator => {

@@ -3,6 +3,8 @@ import {Database} from "./database";
 import {Routes} from "./routes";
 import {Logger} from "./logger";
 import winston from "winston";
+import "express-async-errors";
+import {errorHandler} from "../middlewares/error.handler";
 
 export class Server {
 
@@ -38,6 +40,7 @@ export class Server {
         this.databaseSetUp();
         this.app.use(express.json());
         this.routesSetUp();
+        this.app.use(errorHandler);
     }
 
     private databaseSetUp(): void {

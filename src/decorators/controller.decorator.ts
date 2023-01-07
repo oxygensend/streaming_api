@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 /**
- * Controller decorator
+ * Controller decorators
  * @constructor
  */
 export const Controller = (prefix: string = '/'): ClassDecorator => {

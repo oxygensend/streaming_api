@@ -1,6 +1,6 @@
 import {Router} from "express";
-import {Method, IRoute} from "../decorator/route.types";
-import {controllers} from "../controller";
+import {Method, IRoute} from "../decorators/route.types";
+import {controllers} from "../controllers";
 import {Container} from "typedi";
 
 
