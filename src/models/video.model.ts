@@ -1,8 +1,18 @@
 import {Schema, model} from "mongoose";
 
 export interface IVideo {
+    _id?: string,
     title: string,
-    filename: string,
+    originalName: string,
+    bytes: number,
+    path: string,
+    duration: number,
+    createdAt: Date
+    save(): void;
+}
+
+export interface VideoBody {
+    title: string
 }
 
 const videoSchema = new Schema<IVideo>({
@@ -13,12 +23,28 @@ const videoSchema = new Schema<IVideo>({
         trim: true,
         required: true
     },
-    filename: {
+    originalName: {
         type: String,
+        required: true
+    },
+    bytes: {
+        type: Number,
+        required: true,
+    },
+    path: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    duration: {
+        type: Number,
         required: true
     }
 
-});
+}, {versionKey: false});
 
 
 export const Video = model<IVideo>('Video', videoSchema);

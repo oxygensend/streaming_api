@@ -1,10 +1,12 @@
-import express, {Application, Request, Response} from "express";
+import express, {Application} from "express";
 import {Database} from "./database";
 import {Routes} from "./routes";
 import {Logger} from "./logger";
 import winston from "winston";
 import "express-async-errors";
+import {parse} from "express-form-data";
 import {errorHandler} from "../middlewares/error.handler";
+import * as os from "os";
 
 export class Server {
 
@@ -39,6 +41,10 @@ export class Server {
     private config(): void {
         this.databaseSetUp();
         this.app.use(express.json());
+        this.app.use(parse({
+            uploadDir: os.tmpdir(),
+            autoClean: true,
+        }));
         this.routesSetUp();
         this.app.use(errorHandler);
     }

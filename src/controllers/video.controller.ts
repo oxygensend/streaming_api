@@ -3,11 +3,16 @@ import {Service} from "typedi";
 import {Request, Response} from "express";
 import {Logger} from "../lib/logger";
 import VideoService from "../services/video.service";
-import {Get, Post} from "../decorators/route.decorator";
+import {Delete, Get, Patch, Post} from "../decorators/route.decorator";
 import {objectIDValidator} from "../middlewares/objectID.validator";
+import {IPageOptions, MultipartRequest, UploadedFile} from "../constants/types";
+import {IVideo, Video} from "../models/video.model";
+import {HttpExceptions} from "../exceptions/exceptions";
+import {HTTP_CODES} from "../constants/http.codes";
 
-@Controller('/videos')
+
 @Service()
+@Controller('/videos')
 export default class VideoController {
 
     private readonly logger;
@@ -16,21 +21,68 @@ export default class VideoController {
         this.logger = Logger.getLogger();
     }
 
+    @Get()
+    public async getAllAction(req: Request, res: Response) {
+
+        const pageOptions: IPageOptions = {
+            page: parseInt(<string>req.query.page, 10) || 1,
+            limit: parseInt(<string>req.query.limit, 10) || 10
+        }
+
+        const videos = await this.videoService.paginateVideos(pageOptions)
+
+        return res.json({
+            "data": videos,
+            "count": videos.length,
+            ...pageOptions,
+        });
+    }
 
     @Get('/:id', [objectIDValidator])
     public async getOneAction(req: Request, res: Response) {
-        const video = await this.videoService.findVideo(req.params.id);
-        this.logger.info(req.params.id);
-        res.send(video);
+        const video: IVideo | null = await Video.findById(req.params.id);
+
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        return res.json(video);
+    }
+
+    @Post()
+    public async createAction(req: MultipartRequest, res: Response) {
+
+        const file: UploadedFile = req.files.file;
+        const video = await this.videoService.createVideo({title: req.body.title, file: file});
+
+        return res
+            .status(HTTP_CODES.CREATED)
+            .json(video);
+    }
+
+    @Delete('/:id', [objectIDValidator])
+    public async deleteAction(req: Request, res: Response) {
+
+        await this.videoService.deleteVideo(req.params.id)
+
+        return res
+            .status(HTTP_CODES.NO_CONTENT)
+            .json({});
 
     }
 
-    @Post('/')
-    public async createAction(req: Request, res: Response) {
-        this.logger.info(req.body);
-        const video = await this.videoService.createVideo(req.body);
+    @Patch('/:id', [objectIDValidator])
+    public async updateAction(req: Request, res: Response) {
 
-        res.send(video);
+        let video: IVideo | null = await Video.findById(req.params.id);
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        video = await this.videoService.updateVideoData(req.body, video)
+        return res.json(video);
+
     }
-
 }
+
+

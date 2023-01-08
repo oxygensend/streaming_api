@@ -5,7 +5,7 @@ import 'reflect-metadata';
  *  Method decorators factory responsible for routing in application
  */
 const methodRouteDecoratorFactory = (method: Method) => {
-    return (path: string, middlewares: any[] = []): MethodDecorator => {
+    return (path: string = '/', middlewares: any[] = []): MethodDecorator => {
         return (target: Object, propertyKey: symbol | string): void => {
             // Create routes metadata in the object if doesn't exists
             if (!Reflect.hasMetadata('routes', target.constructor)) {
