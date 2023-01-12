@@ -7,6 +7,7 @@ import {Server} from "../../src/lib/server";
 import {Database} from "../../src/lib/database";
 import fs from 'fs';
 import {FileService} from "../../src/services/file.service";
+import {Types} from "mongoose";
 
 
 describe("/api/videos", () => {

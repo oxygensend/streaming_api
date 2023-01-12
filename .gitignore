@@ -2,6 +2,9 @@ data/*
 node_modules/*
 .env.local
 
+coverage/*
+
+yarn-error.log
 .idea
 var
 
