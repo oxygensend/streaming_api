@@ -8,6 +8,8 @@ COPY yarn.lock .
 
 COPY src ./src
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 RUN npm install -g yarn
 RUN yarn install
 RUN yarn run build

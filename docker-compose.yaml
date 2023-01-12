@@ -11,7 +11,7 @@ services:
             - PORT=${PORT}
             - MONGO_URL=${MONGO_URL}
         ports:
-            - '3000:3000'
+            - "3000:3000"
         networks:
             - streaming_api
         volumes:
@@ -24,7 +24,7 @@ services:
         container_name: mongo
         image: mongo:4.4.6
         ports:
-            - '27017:27017'
+            - "27017:27017"
         networks:
             - streaming_api
         volumes:

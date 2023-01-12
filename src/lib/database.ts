@@ -1,6 +1,7 @@
 import * as mongoose from "mongoose";
 import {Logger} from "./logger";
 import winston from "winston";
+import {config} from "../config/config";
 
 export class Database {
 
@@ -13,7 +14,7 @@ export class Database {
     }
 
     public async connect(): Promise<boolean> {
-        const uri = process.env["MONGODB_URI"] as string;
+        const uri = config.db_url as string;
         try {
             await this.mongoose.connect(uri)
             this.logger.info("Connected to Mongodb: " + uri);
@@ -25,8 +26,8 @@ export class Database {
 
     }
 
-    public disconnect() {
-        this.mongoose.connection.close((e) => {
+    public async disconnect() {
+        await this.mongoose.connection.close((e) => {
             if (e) {
                 this.logger.error(e)
                 return false;

@@ -21,7 +21,6 @@ export class Routes {
     }
 
     public setRoute(method: Method, path: string, middlewares: any[], binding: any) {
-        console.log(...middlewares);
         this.router[method](path, ...middlewares, binding);
     }
 
@@ -35,7 +34,6 @@ export class Routes {
             const routes: IRoute[] = Reflect.getMetadata('routes', controllerClass);
             const prefix: string = Reflect.getMetadata('prefix', controllerClass);
             routes.forEach((route: IRoute) => {
-                console.log(...route.middlewares);
                 this.setRoute(
                     route.method,
                     `${prefix}${route.path}`,

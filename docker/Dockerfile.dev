@@ -6,6 +6,8 @@ COPY package.json .
 COPY tsconfig.json .
 COPY yarn.lock .
 
+RUN apt-get update && apt-get install -y ffmpeg
+
 RUN npm install -g typescript
 RUN npm install -g ts-node
 #USER node

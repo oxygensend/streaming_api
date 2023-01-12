@@ -4,9 +4,9 @@ import {Routes} from "./routes";
 import {Logger} from "./logger";
 import winston from "winston";
 import "express-async-errors";
-import {parse} from "express-form-data";
 import {errorHandler} from "../middlewares/error.handler";
 import * as os from "os";
+import {parse} from "express-form-data";
 
 export class Server {
 
@@ -15,6 +15,7 @@ export class Server {
     private static instance: Server;
     private routes: Routes;
     private logger: winston.Logger;
+    private httpServer: any;
 
     private constructor() {
         this.app = express();
@@ -33,13 +34,18 @@ export class Server {
     public run(): void {
 
         this.config();
-        this.app.listen(this.port, () => {
-            this.logger.info(`App is listening on port ${this.port} !`)
-        })
+        if (process.env.NODE_ENV !== 'test') {
+            this.httpServer = this.app.listen(this.port, () => {
+                this.logger.info(`App is listening on port ${this.port} !`)
+            })
+        }
+    }
+
+    public close(): void {
+        this.httpServer.close();
     }
 
     private config(): void {
-        this.databaseSetUp();
         this.app.use(express.json());
         this.app.use(parse({
             uploadDir: os.tmpdir(),
@@ -47,6 +53,7 @@ export class Server {
         }));
         this.routesSetUp();
         this.app.use(errorHandler);
+        this.databaseSetUp();
     }
 
     private databaseSetUp(): void {
@@ -57,5 +64,9 @@ export class Server {
     private routesSetUp(): void {
         this.app.use(this.routes.getRouter());
         this.routes.registerRoutes();
+    }
+
+    public getApp(): Application {
+        return this.app;
     }
 }

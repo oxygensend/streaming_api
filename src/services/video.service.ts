@@ -1,11 +1,10 @@
 import {Service} from "typedi";
-import {Video, IVideo} from "../models/video.model";
+import {IVideo, Video} from "../models/video.model";
 import {Logger} from "../lib/logger";
 import {IPageOptions, UploadedFile} from "../constants/types";
 import {FileService} from "./file.service";
 import {VideoDto} from "../dto/video.dto";
 import {HttpExceptions} from "../exceptions/exceptions";
-import getVideoDurationInSeconds from "get-video-duration";
 import {VideoValidator} from "../validators/video.validator";
 
 @Service()
@@ -26,7 +25,7 @@ export default class VideoService {
         }
         const file = videoDto.file as UploadedFile;
         const path = this.fileService.uploadFile(file);
-        const videoDuration = await getVideoDurationInSeconds(file.path);
+        const videoDuration = await this.fileService.getVideoDuration(path);
 
         return Video.create({
             title: videoDto.title,
