@@ -83,6 +83,33 @@ export default class VideoController {
         return res.json(video);
 
     }
+
+    @Get('/:id/stream', [objectIDValidator])
+    public async streamAction(req: Request, res: Response) {
+
+        let video: IVideo | null = await Video.findById(req.params.id);
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        const range: string | undefined = req.headers.range;
+
+        if (!range) {
+            throw new HttpExceptions.Internal('Range header is required');
+        }
+
+        try {
+            const {header, videoStream} = this.videoService.openVideoStream(video, range);
+
+            res.writeHead(HTTP_CODES.PARTIAL_CONTENT, header);
+            videoStream.pipe(res);
+
+        } catch (error){
+            this.logger.error('Undefined error occured while streaming video ' + video._id);
+            throw error;
+        }
+
+    }
 }
 
 

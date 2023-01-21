@@ -1,11 +1,12 @@
 import {Service} from "typedi";
 import {IVideo, Video} from "../models/video.model";
 import {Logger} from "../lib/logger";
-import {IPageOptions, UploadedFile} from "../constants/types";
+import {IPageOptions, IVideoStream, UploadedFile} from "../constants/types";
 import {FileService} from "./file.service";
 import {VideoDto} from "../dto/video.dto";
 import {HttpExceptions} from "../exceptions/exceptions";
 import {VideoValidator} from "../validators/video.validator";
+import fs from "fs";
 
 @Service()
 export default class VideoService {
@@ -68,6 +69,30 @@ export default class VideoService {
         await video.save();
 
         return video
+
     }
 
+    public openVideoStream(video: IVideo, range: string): IVideoStream {
+        let [startByte, endByte] = range.replace('bytes=', '').split('-').map((el) => parseInt(el));
+
+        if (!startByte) {
+            startByte = 0;
+        }
+
+        if (!endByte) {
+            endByte = video.bytes - 1;
+        }
+
+        const chunkSize = endByte - startByte + 1;
+        const videoStream = fs.createReadStream(video.path, {start: startByte, end: endByte});
+        const header = {
+            'Content-Range': `bytes ${startByte}-${endByte}/${video.bytes}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunkSize,
+            'Content-Type': 'video/mp4',
+        };
+
+        return {header, videoStream};
+
+    }
 }

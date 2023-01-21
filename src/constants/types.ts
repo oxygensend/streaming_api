@@ -1,3 +1,5 @@
+import {ReadStream} from "fs";
+
 export interface MultipartRequest extends Request {
     files?: any
     body: any
@@ -31,4 +33,10 @@ export interface IViolation {
 export interface IVideoViolation {
     title?: string,
     file?: string
+}
+
+
+export interface IVideoStream {
+    videoStream: ReadStream;
+    header: { "Accept-Ranges": string; "Content-Range": string; "Content-Length": number; "Content-Type": string }
 }

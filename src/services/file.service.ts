@@ -25,8 +25,7 @@ export class FileService {
 
         try {
             const fileExtension: string = extname(file.originalFilename);
-            const newDirectory: string = `${config.rootDirectory}/${config.storageDirectory}`;
-            const newPath: string = uniqueFilename(newDirectory) + fileExtension;
+            const newPath: string = uniqueFilename(config.storageDirectory) + fileExtension;
 
             fs.readFile(file.path, (err, data) => {
                 if (err) throw err;

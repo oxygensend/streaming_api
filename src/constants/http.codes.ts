@@ -6,5 +6,6 @@ export enum HTTP_CODES {
     BAD_REQUEST = 400,
     CREATED = 201,
     SUCCESS = 200,
-    NO_CONTENT = 204
+    NO_CONTENT = 204,
+    PARTIAL_CONTENT = 206
 }

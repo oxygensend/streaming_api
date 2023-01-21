@@ -4,10 +4,11 @@ import {config} from "../../src/config/config";
 import supertest from 'supertest';
 import {HTTP_CODES} from "../../src/constants/http.codes";
 import {Server} from "../../src/lib/server";
-import {Database} from "../../src/lib/database";
-import fs from 'fs';
+import fs  from 'fs';
 import {FileService} from "../../src/services/file.service";
 import {Types} from "mongoose";
+import {Readable} from "stream";
+import {describe} from "node:test";
 
 
 describe("/api/videos", () => {
@@ -316,6 +317,55 @@ describe("/api/videos", () => {
 
             expect(res.status).toBe(HTTP_CODES.CREATED);
             expect(videoFromDB).not.toBeNull();
+        })
+    })
+
+
+    describe('GET /:id/stream', () => {
+
+        let video: IVideo;
+
+        beforeEach(async () => {
+            video = await Video.create({
+                title: "Test_video",
+                originalName: "test_Record.mov",
+                bytes: 464518,
+                path: "/app/2e33e281.mov",
+                duration: 2
+            });
+
+            // @ts-ignore
+            jest.spyOn(fs, 'createReadStream').mockImplementationOnce((path: any, options?: any) => {
+                return new Readable();
+            });
+        })
+        afterEach(async () => {
+            await Video.deleteMany();
+        })
+
+
+        it('return 404 when video doesnt exists', async () => {
+            const res = await request.get('/videos/' + new Types.ObjectId + '/stream');
+            expect(res.status).toBe(HTTP_CODES.NOT_FOUND);
+        })
+
+        it('return 500 when range header is missing', async () => {
+            const res = await request
+                .get('/videos/' + video._id + '/stream');
+
+
+            expect(res.status).toBe(HTTP_CODES.INTERNAL_SERVER_ERROR);
+        })
+
+        it('return 206 response when everythink is OK ', async () => {
+
+
+            // TODO FIX
+            const res = await request
+                .get('/videos/' + video._id + '/stream')
+                .set({'Range': 'bytes=0-1'});
+
+            expect(res.status).toBe(HTTP_CODES.PARTIAL_CONTENT);
         })
     })
 
