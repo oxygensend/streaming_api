@@ -6,6 +6,7 @@ export interface IVideo {
     originalName: string,
     bytes: number,
     path: string,
+    s3Id: string,
     duration: number,
     createdAt: Date
     save(): void;
@@ -32,6 +33,10 @@ const videoSchema = new Schema<IVideo>({
         required: true,
     },
     path: {
+        type: String,
+        required: true
+    },
+    s3Id: {
         type: String,
         required: true
     },

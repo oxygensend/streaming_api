@@ -9,6 +9,8 @@ import {IPageOptions, MultipartRequest, UploadedFile} from "../constants/types";
 import {IVideo, Video} from "../models/video.model";
 import {HttpExceptions} from "../exceptions/exceptions";
 import {HTTP_CODES} from "../constants/http.codes";
+import {AwsService} from "../services/aws.service";
+import {config} from "../config/config";
 
 
 @Service()
@@ -17,7 +19,7 @@ export default class VideoController {
 
     private readonly logger;
 
-    constructor(private readonly videoService: VideoService) {
+    constructor(private readonly videoService: VideoService, private readonly s3Service: AwsService) {
         this.logger = Logger.getLogger();
     }
 
@@ -104,11 +106,53 @@ export default class VideoController {
             res.writeHead(HTTP_CODES.PARTIAL_CONTENT, header);
             videoStream.pipe(res);
 
-        } catch (error){
+        } catch (error) {
             this.logger.error('Undefined error occured while streaming video ' + video._id);
             throw error;
         }
 
+    }
+
+    @Get('/:id/stream-from-s3', [objectIDValidator])
+    public async streamFromS3Action(req: Request, res: Response) {
+
+        let video: IVideo | null = await Video.findById(req.params.id);
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        try {
+            const videoStream = await this.s3Service.createS3Stream(video.s3Id);
+
+            res.status(HTTP_CODES.PARTIAL_CONTENT);
+            videoStream.pipe(res);
+        } catch (error) {
+            this.logger.error('Undefined error occured while streaming video ' + video._id);
+            throw error;
+        }
+
+    }
+
+    @Get('/:id/stream-directly-from-s3', [objectIDValidator])
+    public async streamDirectlyFromS3Action(req: Request, res: Response) {
+
+        let video: IVideo | null = await Video.findById(req.params.id);
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        res.redirect(this.s3Service.getSignedUrl(video.s3Id));
+    }
+
+    @Get('/:id/test', [objectIDValidator])
+    public async streamTest(req: Request, res: Response) {
+
+        let video: IVideo | null = await Video.findById(req.params.id);
+        if (!video) {
+            throw new HttpExceptions.NotFound('Video not found');
+        }
+
+        res.render(config.templatesDirectory + '/index.html', {id: video._id});
     }
 }
 

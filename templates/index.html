@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Streaming</title>
+</head>
+<body>
+<h2>S3 presigned URL</h2>
+<video  width="650" controls muted="muted" autoplay>
+    <source src="/videos/<%= id %>/stream-directly-from-s3" type="video/mp4" />
+</video>
+<h2>S3 Stream</h2>
+<video  width="650" controls muted="muted" autoplay>
+    <source src="/videos/<%= id %>/stream-from-s3" type="video/mp4" />
+</video>
+<h2>File Stream</h2>
+<video  width="650" controls muted="muted" autoplay>
+    <source src="/videos/<%= id %>/stream" type="video/mp4" />
+</video>
+</body>
+</html>

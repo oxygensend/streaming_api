@@ -4,11 +4,13 @@ import {config} from "../../src/config/config";
 import supertest from 'supertest';
 import {HTTP_CODES} from "../../src/constants/http.codes";
 import {Server} from "../../src/lib/server";
-import fs  from 'fs';
+import fs from 'fs';
 import {FileService} from "../../src/services/file.service";
 import {Types} from "mongoose";
 import {Readable} from "stream";
-import {describe} from "node:test";
+import {AwsService} from "../../src/services/aws.service";
+import {UploadedFile} from "../../src/constants/types";
+import {v4 as uuidv4} from 'uuid';
 
 
 describe("/api/videos", () => {
@@ -78,7 +80,8 @@ describe("/api/videos", () => {
                 originalName: "test_Record.mov",
                 bytes: 464518,
                 path: "/app/2e33e281.mov",
-                duration: 2
+                duration: 2,
+                s3Key: '123-123-123'
             });
             const res = await request.get('/videos/' + video._id);
             await Video.deleteMany();
@@ -110,13 +113,16 @@ describe("/api/videos", () => {
                 filename: any, callback: any) => {
                 callback(null);
             });
+            jest.spyOn(AwsService.prototype, 'removeFileFromS3').mockImplementationOnce((s3Key: string) => {
+            });
 
             const video: IVideo = await Video.create({
                 title: "Test_video",
                 originalName: "test_Record.mov",
                 bytes: 464518,
                 path: "/app/2e33e281.mov",
-                duration: 2
+                duration: 2,
+                s3Id: '123-123-123'
             });
 
             const res = await request.delete('/videos/' + video._id);
@@ -139,7 +145,8 @@ describe("/api/videos", () => {
                 originalName: "test_Record.mov",
                 bytes: 464518,
                 path: "/app/2e33e281.mov",
-                duration: 2
+                duration: 2,
+                s3Id: '123-123-123-123'
             });
         })
         afterEach(async () => {
@@ -204,6 +211,9 @@ describe("/api/videos", () => {
             });
             jest.spyOn(fs, 'readFile').mockImplementationOnce((path: any, callback: any) => {
                 callback();
+            });
+            jest.spyOn(AwsService.prototype, 'uploadFileToS3').mockImplementationOnce((file: UploadedFile) => {
+                return uuidv4();
             });
             jest.spyOn(FileService.prototype, 'getVideoDuration')
                 .mockImplementation((filePath: string): Promise<number> => new Promise((resolve, reject) => resolve(10)));
@@ -331,7 +341,8 @@ describe("/api/videos", () => {
                 originalName: "test_Record.mov",
                 bytes: 464518,
                 path: "/app/2e33e281.mov",
-                duration: 2
+                duration: 2,
+                s3Id: '123-123-123-123'
             });
 
             // @ts-ignore

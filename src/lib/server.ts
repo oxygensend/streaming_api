@@ -54,6 +54,10 @@ export class Server {
         this.routesSetUp();
         this.app.use(errorHandler);
         this.databaseSetUp();
+
+        // html engine setup
+        this.app.engine('html', require('ejs').renderFile);
+        this.app.set('view engine', 'html');
     }
 
     private databaseSetUp(): void {

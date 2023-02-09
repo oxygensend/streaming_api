@@ -7,6 +7,7 @@ import {VideoDto} from "../dto/video.dto";
 import {HttpExceptions} from "../exceptions/exceptions";
 import {VideoValidator} from "../validators/video.validator";
 import fs from "fs";
+import {AwsService} from "./aws.service";
 
 @Service()
 export default class VideoService {
@@ -14,7 +15,8 @@ export default class VideoService {
     private readonly logger;
 
     constructor(private readonly fileService: FileService,
-                private readonly validator: VideoValidator) {
+                private readonly validator: VideoValidator,
+                private readonly awsService: AwsService) {
         this.logger = Logger.getLogger();
     }
 
@@ -26,13 +28,15 @@ export default class VideoService {
         }
         const file = videoDto.file as UploadedFile;
         const path = this.fileService.uploadFile(file);
-        const videoDuration = await this.fileService.getVideoDuration(path);
+        const s3Id = this.awsService.uploadFileToS3(file);
+        const videoDuration = await this.fileService.getVideoDuration(file.path);
 
         return Video.create({
             title: videoDto.title,
             originalName: file.originalFilename,
             path: path,
             bytes: file.size,
+            s3Id: s3Id,
             duration: videoDuration
         });
 
@@ -55,6 +59,7 @@ export default class VideoService {
             throw new HttpExceptions.NotFound('Video not found');
         }
 
+        this.awsService.removeFileFromS3(video.s3Id);
         this.fileService.deleteFile(video.path);
     }
 
