@@ -1,7 +1,10 @@
 import {Router} from "express";
 import {Method, IRoute} from "../decorators/route.types";
-import {controllers} from "../controllers";
 import {Container} from "typedi";
+import * as fs from 'fs';
+import { config } from '../config/config';
+import * as path from 'path';
+import controllersDirectory = config.controllersDirectory;
 
 
 export class Routes {
@@ -29,19 +32,23 @@ export class Routes {
     }
 
     public registerRoutes(): void {
-        controllers.forEach((controllerClass) => {
-            const instance: any = Container.get(controllerClass);
-            const routes: IRoute[] = Reflect.getMetadata('routes', controllerClass);
-            const prefix: string = Reflect.getMetadata('prefix', controllerClass);
-            routes.forEach((route: IRoute) => {
-                this.setRoute(
-                    route.method,
-                    `${prefix}${route.path}`,
-                    route.middlewares,
-                    instance[route.methodName].bind(instance)
-                );
+        fs.readdirSync(config.controllersDirectory)
+            .filter((file) => /\.(controller\.js|controller\.ts)$/.test(file))
+            .forEach((file) => {
+                const controllerClass = require(path.join(controllersDirectory, file)).default;
+
+                const instance: any = Container.get(controllerClass);
+                const routes: IRoute[] = Reflect.getMetadata('routes', controllerClass);
+                const prefix: string = Reflect.getMetadata('prefix', controllerClass);
+                routes.forEach((route: IRoute) => {
+                    this.setRoute(
+                        route.method,
+                        `${prefix}${route.path}`,
+                        route.middlewares,
+                        instance[route.methodName].bind(instance),
+                    );
+                });
             });
-        });
     }
 
 }

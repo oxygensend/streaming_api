@@ -5,6 +5,7 @@ configDotEnv({path: '.env.local'})
 export namespace config {
 
     export const rootDirectory = process.env.PWD;
+    export const controllersDirectory = process.env.PWD + '/src/controllers';
     export const storageDirectory = process.env.PWD + "/storage";
     export const testDirectory = process.env.PWD + '/tests';
     export const templatesDirectory = process.env.PWD + '/templates';
